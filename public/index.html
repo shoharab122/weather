@@ -4,24 +4,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WeatherWise • Live Station</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --glass: rgba(255,255,255,0.06);
-    --glass-border: rgba(255,255,255,0.12);
-    --text: #f2f3f5;
-    --text-dim: rgba(242,243,245,0.55);
-    --text-faint: rgba(242,243,245,0.32);
-    --accent-warm: #f5a35c;
-    --accent-cool: #6cc9e8;
-    --danger: #ffffff;
+    --glass: rgba(255,255,255,0.07);
+    --glass-border: rgba(255,255,255,0.14);
+    --text: #f6f4f0;
+    --text-dim: rgba(246,244,240,0.58);
+    --text-faint: rgba(246,244,240,0.34);
+    --ember: #ff9457;
+    --ember-soft: rgba(255,148,87,0.18);
+    --mist: #7fd6e6;
+    --mist-soft: rgba(127,214,230,0.16);
+    --ok: #bdeecb;
+    --warn: #ffd2a3;
   }
 
   html, body {
     height: 100%;
-    font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
-    background: #2b2f36;
+    font-family: 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
+    background: #16171a;
     color: var(--text);
   }
 
@@ -36,23 +42,32 @@
   .stage {
     position: relative;
     width: 100%;
-    max-width: 1200px;
-    aspect-ratio: 1200 / 760;
-    border-radius: 28px;
+    max-width: 1240px;
+    aspect-ratio: 1240 / 780;
+    border-radius: 26px;
     overflow: hidden;
-    box-shadow: 0 40px 90px rgba(0,0,0,0.55);
+    box-shadow: 0 50px 110px rgba(0,0,0,0.6);
     background:
-      linear-gradient(180deg, rgba(10,12,16,0.55) 0%, rgba(10,12,16,0.15) 30%, rgba(15,10,8,0.55) 100%),
-      url('https://images.unsplash.com/photo-1500674425229-f692875b0ab7?q=80&w=1600&auto=format&fit=crop')
+      linear-gradient(195deg, rgba(9,11,16,0.72) 0%, rgba(20,16,14,0.28) 42%, rgba(46,20,8,0.55) 100%),
+      url('https://images.unsplash.com/photo-1534088568595-a066f410bcda?q=80&w=1800&auto=format&fit=crop')
       center/cover no-repeat;
+  }
+
+  .stage::after {
+    /* soft ember glow rising from the bottom, echoing a stormy sunset */
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 40% at 62% 78%, rgba(255,148,87,0.16), transparent 70%);
+    pointer-events: none;
   }
 
   .layout {
     position: relative;
     z-index: 2;
     display: grid;
-    grid-template-columns: 260px 1fr;
-    gap: 28px;
+    grid-template-columns: 264px 1fr;
+    gap: 26px;
     height: 100%;
     padding: 26px;
   }
@@ -61,21 +76,28 @@
   .sidebar {
     background: var(--glass);
     border: 1px solid var(--glass-border);
-    backdrop-filter: blur(18px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-radius: 20px;
     padding: 22px 18px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 18px;
   }
 
-  .brand { font-size: 1.05em; font-weight: 500; letter-spacing: 0.01em; }
-  .brand-underline { width: 46px; height: 2px; background: var(--text-faint); margin-top: 6px; border-radius: 2px; }
+  .brand-row { display: flex; align-items: center; gap: 9px; }
+  .brand-mark {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(140deg, var(--ember), var(--mist));
+    flex-shrink: 0;
+  }
+  .brand { font-family: 'Fraunces', serif; font-size: 1.18em; font-weight: 500; letter-spacing: 0.01em; }
 
-  .label-sm { font-size: 0.72em; color: var(--text-dim); text-transform: none; margin-bottom: 10px; }
+  .label-sm { font-size: 0.72em; color: var(--text-dim); margin-bottom: 10px; }
 
   .status-card {
-    background: rgba(0,0,0,0.28);
+    background: rgba(0,0,0,0.3);
     border: 1px solid var(--glass-border);
     border-radius: 16px;
     padding: 14px;
@@ -84,16 +106,16 @@
   .status-pct { font-size: 0.85em; color: var(--text-dim); }
   .status-pill {
     display: inline-block;
-    background: #fff;
-    color: #111;
+    background: var(--ok);
+    color: #10241a;
     font-size: 0.78em;
     font-weight: 600;
     padding: 6px 14px;
     border-radius: 20px;
     margin-bottom: 10px;
   }
-  .status-pill.warn { background: #ffdca3; }
-  .status-pill.ok { background: #c7f2d8; }
+  .status-pill.warn { background: var(--warn); color: #3a2308; }
+  .status-pill.ok { background: var(--ok); color: #10241a; }
 
   .spark-wrap { height: 46px; }
 
@@ -103,11 +125,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    cursor: default;
   }
 
   .device-card {
-    background: rgba(0,0,0,0.28);
+    background: rgba(0,0,0,0.3);
     border: 1px solid var(--glass-border);
     border-radius: 16px;
     padding: 16px;
@@ -115,89 +136,26 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 210px;
+    min-height: 220px;
   }
 
-  .device-visual {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-  }
+  .device-visual { flex: 1; display: flex; align-items: center; justify-content: center; }
 
-  .globe-wrap {
-    position: relative;
-    width: 148px;
-    height: 148px;
-    border-radius: 50%;
-    overflow: hidden;
-    background:
-      radial-gradient(circle at 32% 30%, rgba(245,163,92,0.55), transparent 55%),
-      radial-gradient(circle at 65% 70%, rgba(108,201,232,0.18), transparent 55%),
-      #171a1f;
-    box-shadow: inset 0 0 30px rgba(0,0,0,0.6), 0 0 0 1px var(--glass-border);
-  }
-  .globe-wrap::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image:
-      repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 20px),
-      repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 20px);
-    border-radius: 50%;
-  }
-  .globe-pin {
-    position: absolute;
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(255,255,255,0.15);
-  }
-
-  .humidity-ring {
-    position: relative;
-    width: 120px;
-    height: 120px;
-  }
-  .humidity-ring svg { transform: rotate(-90deg); }
-  .humidity-ring .ring-bg { stroke: rgba(255,255,255,0.15); }
-  .humidity-ring .ring-fg { stroke: var(--accent-cool); stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
-  .ring-label {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  .ring-label .val { font-size: 1.5em; font-weight: 600; }
-  .ring-label .sub { font-size: 0.68em; color: var(--text-dim); }
-
-  .today-stats { display: flex; flex-direction: column; gap: 14px; flex: 1; justify-content: center; }
+  .today-stats { display: flex; flex-direction: column; gap: 15px; flex: 1; justify-content: center; width: 100%; }
   .today-stat-row { display: flex; align-items: center; gap: 12px; }
   .today-stat-icon {
-    width: 38px; height: 38px;
+    width: 36px; height: 36px;
     border-radius: 50%;
     background: rgba(255,255,255,0.08);
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.05em;
+    font-size: 1em;
     flex-shrink: 0;
   }
-  .today-stat-body { flex: 1; }
-  .today-stat-label { font-size: 0.72em; color: var(--text-dim); margin-bottom: 3px; }
-  .today-stat-bar-track {
-    height: 5px;
-    border-radius: 3px;
-    background: rgba(255,255,255,0.1);
-    overflow: hidden;
-  }
-  .today-stat-bar-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.6s ease;
-  }
-  .today-stat-val { font-size: 0.95em; font-weight: 600; margin-left: 8px; white-space: nowrap; }
+  .today-stat-body { flex: 1; min-width: 0; }
+  .today-stat-label { font-size: 0.72em; color: var(--text-dim); margin-bottom: 4px; }
+  .today-stat-bar-track { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.1); overflow: hidden; }
+  .today-stat-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+  .today-stat-val { font-size: 0.95em; font-weight: 600; margin-left: 6px; white-space: nowrap; }
 
   .device-name {
     background: rgba(255,255,255,0.08);
@@ -209,21 +167,10 @@
   }
 
   /* ---------- Main ---------- */
-  .main { display: flex; flex-direction: column; height: 100%; }
+  .main { display: flex; flex-direction: column; height: 100%; min-width: 0; }
 
-  .top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
-  }
-  .location {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.92em;
-    color: var(--text-dim);
-  }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .location { display: flex; align-items: center; gap: 8px; font-size: 0.92em; color: var(--text-dim); }
   .location b { color: var(--text); font-weight: 500; }
 
   .top-actions { display: flex; gap: 10px; align-items: center; }
@@ -234,6 +181,7 @@
     border: 1px solid var(--glass-border);
     display: flex; align-items: center; justify-content: center;
     font-size: 0.95em;
+    cursor: pointer;
   }
   .pill-btn {
     background: rgba(255,255,255,0.12);
@@ -244,59 +192,51 @@
     color: var(--text);
   }
 
-  .hero {
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 20px;
-    align-items: flex-start;
-    margin-bottom: 18px;
-  }
+  .hero { display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: flex-start; margin-bottom: 16px; }
 
-  .temp-row { display: flex; align-items: flex-start; gap: 18px; }
+  .temp-row { display: flex; align-items: flex-start; gap: 16px; }
   .temp-big {
-    font-size: 6em;
-    font-weight: 200;
-    line-height: 0.85;
-    letter-spacing: -0.03em;
+    font-family: 'Fraunces', serif;
+    font-size: 6.2em;
+    font-weight: 300;
+    line-height: 0.82;
+    letter-spacing: -0.02em;
   }
-  .hl-stack { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .hl-stack { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
   .hl-pill {
-    background: rgba(0,0,0,0.32);
+    background: rgba(0,0,0,0.34);
     border: 1px solid var(--glass-border);
     border-radius: 10px;
     padding: 6px 12px;
     font-size: 0.82em;
     color: var(--text-dim);
   }
-  .hl-pill b { color: var(--text); margin-right: 4px; }
+  .hl-pill b { color: var(--text); margin-right: 4px; font-weight: 600; }
 
   .condition {
-    font-size: 2.3em;
-    font-weight: 300;
-    color: rgba(242,243,245,0.85);
+    font-family: 'Fraunces', serif;
+    font-size: 2.2em;
+    font-weight: 400;
+    color: rgba(246,244,240,0.9);
     line-height: 1.15;
-    margin-top: 6px;
+    margin-top: 4px;
   }
 
-  .blurb {
-    font-size: 0.88em;
-    color: var(--text-dim);
-    line-height: 1.5;
-    max-width: 260px;
-  }
+  .blurb { font-size: 0.87em; color: var(--text-dim); line-height: 1.55; max-width: 270px; }
 
-  .recent-title {
+  .section-title {
     display: flex;
     justify-content: space-between;
+    align-items: baseline;
     font-size: 0.8em;
     color: var(--text-dim);
-    margin: 20px 0 10px;
+    margin: 16px 0 10px;
   }
-  .recent-title span:last-child { color: var(--text); cursor: default; }
+  .section-title span:last-child { color: var(--text-dim); font-size: 0.92em; }
 
   .recent-cards { display: flex; gap: 12px; }
   .recent-card {
-    background: rgba(0,0,0,0.3);
+    background: rgba(0,0,0,0.32);
     border: 1px solid var(--glass-border);
     border-radius: 14px;
     padding: 12px 14px;
@@ -313,41 +253,37 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 0.95em;
   }
-  .rc-temp { font-size: 1.2em; font-weight: 500; }
+  .rc-temp { font-size: 1.2em; font-weight: 600; }
   .rc-name { font-size: 0.82em; color: var(--text); }
   .rc-sub { font-size: 0.72em; color: var(--text-dim); }
-  .recent-card .rc-top { display: flex; justify-content: space-between; align-items: center; }
-  .recent-card .rc-temp { font-size: 1.3em; font-weight: 500; }
-  .recent-card .rc-name { font-size: 0.8em; }
-  .recent-card .rc-sub { font-size: 0.72em; color: var(--text-dim); }
 
-  /* ---------- Bottom wave strip ---------- */
-  .wave-panel { margin-top: auto; }
-  .wave-days {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.85em;
-    color: var(--text-dim);
-    margin-bottom: 6px;
-    padding: 0 6px;
-  }
-  .wave-days .active { color: var(--text); font-weight: 500; }
-
-  .wave-svg-wrap { position: relative; height: 90px; }
-
-  .wave-temps {
-    display: flex;
-    justify-content: space-between;
-    padding: 0 6px;
-    margin-top: 4px;
-  }
-  .wave-temps span {
-    font-size: 1.3em;
-    color: rgba(242,243,245,0.45);
-    font-weight: 300;
+  /* ---------- Projection strip (trend-based, not a forecast API) ---------- */
+  .predict-panel { margin-top: 4px; }
+  .predict-note { font-size: 0.68em; color: var(--text-faint); margin-bottom: 8px; }
+  .predict-cards { display: flex; gap: 10px; }
+  .predict-card {
     flex: 1;
+    background: rgba(0,0,0,0.28);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 10px 8px;
     text-align: center;
   }
+  .predict-time { font-size: 0.68em; color: var(--text-dim); margin-bottom: 6px; }
+  .predict-temp { font-family: 'Fraunces', serif; font-size: 1.5em; font-weight: 500; }
+  .predict-humid { font-size: 0.7em; color: var(--mist); margin-top: 3px; }
+  .predict-arrow { font-size: 0.72em; margin-top: 3px; }
+  .predict-arrow.up { color: var(--ember); }
+  .predict-arrow.down { color: var(--mist); }
+  .predict-arrow.flat { color: var(--text-faint); }
+
+  /* ---------- Bottom wave strip ---------- */
+  .wave-panel { margin-top: auto; padding-top: 10px; }
+  .wave-days { display: flex; justify-content: space-between; font-size: 0.85em; color: var(--text-dim); margin-bottom: 6px; padding: 0 6px; }
+  .wave-days .active { color: var(--text); font-weight: 500; }
+  .wave-svg-wrap { position: relative; height: 84px; }
+  .wave-temps { display: flex; justify-content: space-between; padding: 0 6px; margin-top: 4px; }
+  .wave-temps span { font-family: 'Fraunces', serif; font-size: 1.3em; color: rgba(246,244,240,0.42); font-weight: 300; flex: 1; text-align: center; }
   .wave-temps span.active { color: var(--text); font-weight: 600; }
 
   @media (max-width: 860px) {
@@ -356,6 +292,8 @@
     .hero { grid-template-columns: 1fr; }
     .temp-big { font-size: 4.5em; }
     .condition { font-size: 1.6em; }
+    .predict-cards { flex-wrap: wrap; }
+    .predict-card { min-width: calc(50% - 5px); }
   }
 </style>
 </head>
@@ -366,13 +304,13 @@
 
     <!-- SIDEBAR -->
     <div class="sidebar">
-      <div>
-        <div class="brand">WeatherStation</div>
-        <div class="brand-underline"></div>
+      <div class="brand-row">
+        <div class="brand-mark"></div>
+        <div class="brand">WeatherWise</div>
       </div>
 
       <div>
-        <div class="label-sm">Status</div>
+        <div class="label-sm">Humidity trend</div>
         <div class="status-card">
           <div class="status-top">
             <span class="status-pct" id="humidPct">↑ --%</span>
@@ -384,22 +322,22 @@
       </div>
 
       <div class="device-card">
-        <div class="label-sm">Today's Readings</div>
+        <div class="label-sm">Today's readings</div>
         <div class="device-visual">
           <div class="today-stats">
             <div class="today-stat-row">
               <div class="today-stat-icon">🌡️</div>
               <div class="today-stat-body">
-                <div class="today-stat-label">Avg Temperature</div>
-                <div class="today-stat-bar-track"><div class="today-stat-bar-fill" id="avgTempBar" style="width:0%; background:#f5a35c;"></div></div>
+                <div class="today-stat-label">Avg temperature</div>
+                <div class="today-stat-bar-track"><div class="today-stat-bar-fill" id="avgTempBar" style="width:0%; background:var(--ember);"></div></div>
               </div>
               <div class="today-stat-val" id="avgTempVal">--°</div>
             </div>
             <div class="today-stat-row">
               <div class="today-stat-icon">💧</div>
               <div class="today-stat-body">
-                <div class="today-stat-label">Avg Humidity</div>
-                <div class="today-stat-bar-track"><div class="today-stat-bar-fill" id="avgHumidBar" style="width:0%; background:#6cc9e8;"></div></div>
+                <div class="today-stat-label">Avg humidity</div>
+                <div class="today-stat-bar-track"><div class="today-stat-bar-fill" id="avgHumidBar" style="width:0%; background:var(--mist);"></div></div>
               </div>
               <div class="today-stat-val" id="avgHumidVal">--%</div>
             </div>
@@ -423,6 +361,7 @@
         <div class="location">📍 <b id="deviceLoc">ESP32 Weather Station</b>&nbsp; <span id="todayDate"></span></div>
         <div class="top-actions">
           <div class="icon-btn" id="refreshBtn" title="Refresh now">⟳</div>
+          <div class="pill-btn">Updated <span id="freshness">--</span></div>
           <div class="pill-btn" id="rangeLabel">Last 50 readings</div>
         </div>
       </div>
@@ -443,18 +382,24 @@
         </div>
       </div>
 
-      <div class="recent-title"><span>Recent extremes</span><span>All-time ›</span></div>
+      <div class="section-title"><span>Recent extremes</span><span>All-time</span></div>
       <div class="recent-cards">
         <div class="recent-card">
           <div class="rc-top"><div class="rc-icon">🔥</div><span class="rc-temp" id="peakTemp">--°</span></div>
-          <div class="rc-name">Peak Temperature</div>
+          <div class="rc-name">Peak temperature</div>
           <div class="rc-sub">All-time high</div>
         </div>
         <div class="recent-card">
           <div class="rc-top"><div class="rc-icon">💧</div><span class="rc-temp" id="peakHumid">--%</span></div>
-          <div class="rc-name">Peak Humidity</div>
+          <div class="rc-name">Peak humidity</div>
           <div class="rc-sub">All-time high</div>
         </div>
+      </div>
+
+      <div class="section-title"><span>Projected next readings</span><span>Trend-based</span></div>
+      <div class="predict-panel">
+        <div class="predict-note">Extrapolated from your sensor's recent trend — not a weather service forecast.</div>
+        <div class="predict-cards" id="predictCards"></div>
       </div>
 
       <div class="wave-panel">
@@ -482,19 +427,62 @@
     return 'Mild & Steady';
   }
 
+  // Coerce to a real number and fall back to 0 if the value is missing,
+  // a string, or NaN — prevents one bad field from breaking every update below it.
+  function safeNum(v) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  // SQLite's CURRENT_TIMESTAMP stores "YYYY-MM-DD HH:MM:SS" in UTC but with no
+  // timezone marker. Most browsers parse that shape as LOCAL time, not UTC —
+  // which silently shifts every displayed time by your UTC offset. This
+  // normalizes it to real UTC before handing it to Date, so "last updated",
+  // chart labels, and projected times are actually accurate. Values that
+  // already come with a timezone (like the SSE broadcast's toISOString())
+  // pass through unchanged.
+  function parseServerTime(raw) {
+    if (typeof raw === 'string' && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(raw)) {
+      return new Date(raw.replace(' ', 'T') + 'Z');
+    }
+    return new Date(raw);
+  }
+
+  // Live "how fresh is this" indicator — ticks every second so staleness is
+  // visible immediately instead of only updating when new data arrives.
+  let lastReadingAt = null;
+  function markReadingReceived(rawTime) {
+    lastReadingAt = parseServerTime(rawTime);
+  }
+  function renderFreshness() {
+    const el = document.getElementById('freshness');
+    if (!el) return;
+    if (!lastReadingAt) { el.textContent = ''; return; }
+    const secs = Math.max(0, Math.round((Date.now() - lastReadingAt.getTime()) / 1000));
+    if (secs < 60) el.textContent = secs <= 2 ? 'just now' : `${secs}s ago`;
+    else if (secs < 3600) el.textContent = `${Math.floor(secs / 60)}m ago`;
+    else el.textContent = `${Math.floor(secs / 3600)}h ago`;
+  }
+  setInterval(renderFreshness, 1000);
+
   async function fetchLatest() {
     try {
       const res = await fetch('/api/weather/latest');
       const data = await res.json();
       if (data.temperature === undefined) return;
 
-      document.getElementById('tempMain').textContent = data.temperature.toFixed(1);
-      document.getElementById('humidPct').textContent = `${data.humidity.toFixed(1)}%`;
-      document.getElementById('conditionText').textContent = conditionFor(data.temperature, data.humidity);
-      document.getElementById('deviceStatus').textContent = '🟢 Connected • ' + new Date(data.created_at).toLocaleTimeString();
+      const temp = safeNum(data.temperature);
+      const humidity = safeNum(data.humidity);
+
+      document.getElementById('tempMain').textContent = temp.toFixed(1);
+      document.getElementById('humidPct').textContent = `${humidity.toFixed(1)}%`;
+      document.getElementById('conditionText').textContent = conditionFor(temp, humidity);
+      markReadingReceived(data.created_at);
+      document.getElementById('deviceStatus').textContent = '🟢 Connected • ' + parseServerTime(data.created_at).toLocaleTimeString();
+      renderFreshness();
 
       const pill = document.getElementById('statusPill');
-      if (data.humidity > 80 || data.temperature > 35) {
+      if (humidity > 80 || temp > 35) {
         pill.textContent = 'Dangerous';
         pill.className = 'status-pill warn';
       } else {
@@ -502,6 +490,7 @@
         pill.className = 'status-pill ok';
       }
     } catch (err) {
+      console.error('fetchLatest error:', err);
       document.getElementById('deviceStatus').textContent = '🔴 Disconnected';
     }
   }
@@ -536,7 +525,7 @@
     const step = w / (values.length - 1 || 1);
     const points = values.map((v, i) => `${i * step},${h - ((v - min) / range) * h}`).join(' ');
     svg.innerHTML = `
-      <polyline points="${points}" fill="none" stroke="#f5a35c" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      <polyline points="${points}" fill="none" stroke="#ff9457" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
       <circle cx="${(values.length - 1) * step}" cy="${h - ((values[values.length-1] - min) / range) * h}" r="3.5" fill="#fff"/>
     `;
   }
@@ -574,7 +563,7 @@
       <path d="${path}" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
       <line x1="${pts[midIdx][0]}" y1="0" x2="${pts[midIdx][0]}" y2="${h}" stroke="rgba(255,255,255,0.25)" stroke-dasharray="3,4"/>
       <circle cx="${pts[midIdx][0]}" cy="${pts[midIdx][1]}" r="5" fill="#fff"/>
-      <circle cx="${pts[lastIdx][0]}" cy="${pts[lastIdx][1]}" r="4" fill="#f5a35c"/>
+      <circle cx="${pts[lastIdx][0]}" cy="${pts[lastIdx][1]}" r="4" fill="#ff9457"/>
     `;
 
     // pick ~6 evenly spaced sample points for labels underneath
@@ -582,7 +571,7 @@
     const sampleIdxs = Array.from({length: sampleCount}, (_, i) => Math.round(i * (rows.length - 1) / (sampleCount - 1 || 1)));
 
     labelsEl.innerHTML = sampleIdxs.map((idx, i) => {
-      const t = new Date(rows[idx].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const t = parseServerTime(rows[idx].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       const isMid = i === Math.floor(sampleCount / 2);
       return `<span class="${isMid ? 'active' : ''}">${t}</span>`;
     }).join('');
@@ -593,6 +582,70 @@
     }).join('');
   }
 
+  // ---- Trend-based projection ----
+  // Fits a simple linear trend to the most recent readings and extrapolates
+  // forward. This is a projection of the sensor's own recent trend, not a
+  // real weather forecast — the UI is upfront about that distinction.
+  function linearFit(values) {
+    const n = values.length;
+    if (n < 2) return { slope: 0, intercept: values[0] || 0 };
+    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+    for (let i = 0; i < n; i++) {
+      sumX += i; sumY += values[i]; sumXY += i * values[i]; sumXX += i * i;
+    }
+    const denom = (n * sumXX - sumX * sumX) || 1;
+    const slope = (n * sumXY - sumX * sumY) / denom;
+    const intercept = (sumY - slope * sumX) / n;
+    return { slope, intercept };
+  }
+
+  function renderPredictions(rows) {
+    const container = document.getElementById('predictCards');
+    if (!rows.length) return;
+
+    const recent = rows.slice(-12); // last ~12 readings anchor the trend
+    const temps = recent.map(r => r.temperature);
+    const humids = recent.map(r => r.humidity);
+    const tempFit = linearFit(temps);
+    const humidFit = linearFit(humids);
+
+    // average interval between readings, so projected labels feel like real time steps
+    let avgIntervalMs = 120000; // fallback: 2 min
+    if (recent.length > 1) {
+      const first = parseServerTime(recent[0].created_at).getTime();
+      const last = parseServerTime(recent[recent.length - 1].created_at).getTime();
+      const span = last - first;
+      if (span > 0) avgIntervalMs = span / (recent.length - 1);
+    }
+
+    const lastTime = parseServerTime(recent[recent.length - 1].created_at).getTime();
+    const n = recent.length;
+    const steps = 4;
+    const cards = [];
+
+    for (let s = 1; s <= steps; s++) {
+      const idx = n - 1 + s;
+      const projTemp = tempFit.slope * idx + tempFit.intercept;
+      const projHumid = Math.min(100, Math.max(0, humidFit.slope * idx + humidFit.intercept));
+      const projTime = new Date(lastTime + avgIntervalMs * s);
+
+      const delta = tempFit.slope;
+      const arrowClass = delta > 0.02 ? 'up' : delta < -0.02 ? 'down' : 'flat';
+      const arrowSymbol = delta > 0.02 ? '↑ warming' : delta < -0.02 ? '↓ cooling' : '→ steady';
+
+      cards.push(`
+        <div class="predict-card">
+          <div class="predict-time">${projTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+          <div class="predict-temp">${projTemp.toFixed(1)}°</div>
+          <div class="predict-humid">${projHumid.toFixed(0)}% humidity</div>
+          <div class="predict-arrow ${arrowClass}">${arrowSymbol}</div>
+        </div>
+      `);
+    }
+
+    container.innerHTML = cards.join('');
+  }
+
   async function fetchHistory() {
     try {
       const res = await fetch('/api/weather/history?limit=50');
@@ -600,6 +653,7 @@
       if (!Array.isArray(rows) || !rows.length) return;
       drawSparkline(rows.slice(-20).map(r => r.humidity));
       drawWave(rows);
+      renderPredictions(rows);
     } catch (err) { console.error(err); }
   }
 
@@ -631,19 +685,27 @@
 
     source.addEventListener('open', () => {
       stopFallbackPolling(); // SSE is live, no need to poll
+      // A reconnect can mean we missed readings while disconnected — resync
+      // everything immediately rather than waiting for the next live event,
+      // so the dashboard can't silently keep showing stale data.
+      fetchLatest(); fetchStats(); fetchHistory();
     });
 
     source.addEventListener('reading', (e) => {
       const data = JSON.parse(e.data);
+      const temp = safeNum(data.temperature);
+      const humidity = safeNum(data.humidity);
 
       // Update everything that depends on the latest single reading, instantly
-      document.getElementById('tempMain').textContent = data.temperature.toFixed(1);
-      document.getElementById('humidPct').textContent = `${data.humidity.toFixed(1)}%`;
-      document.getElementById('conditionText').textContent = conditionFor(data.temperature, data.humidity);
-      document.getElementById('deviceStatus').textContent = '🟢 Connected • ' + new Date(data.created_at).toLocaleTimeString();
+      document.getElementById('tempMain').textContent = temp.toFixed(1);
+      document.getElementById('humidPct').textContent = `${humidity.toFixed(1)}%`;
+      document.getElementById('conditionText').textContent = conditionFor(temp, humidity);
+      markReadingReceived(data.created_at);
+      document.getElementById('deviceStatus').textContent = '🟢 Connected • ' + parseServerTime(data.created_at).toLocaleTimeString();
+      renderFreshness();
 
       const pill = document.getElementById('statusPill');
-      if (data.humidity > 80 || data.temperature > 35) {
+      if (humidity > 80 || temp > 35) {
         pill.textContent = 'Dangerous';
         pill.className = 'status-pill warn';
       } else {
@@ -651,8 +713,9 @@
         pill.className = 'status-pill ok';
       }
 
-      // Stats (avg/min/max) and the charts need the full dataset, so refresh
-      // those right after — debounced in case several readings land close together
+      // Stats (avg/min/max), charts, and projections need the full dataset,
+      // so refresh those right after — debounced in case several readings
+      // land close together
       clearTimeout(historyDebounce);
       historyDebounce = setTimeout(() => { fetchStats(); fetchHistory(); }, 150);
     });
