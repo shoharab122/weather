@@ -13,7 +13,7 @@ const db = new sqlite3.Database('./weather.db', (err) => {
     console.error('Database error:', err);
   } else {
     console.log('✅ Connected to SQLite');
-    
+
     db.run(`
       CREATE TABLE IF NOT EXISTS weather_data (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,13 +28,13 @@ const db = new sqlite3.Database('./weather.db', (err) => {
 // Receive data from ESP32
 app.post('/api/weather', (req, res) => {
   const { temperature, humidity } = req.body;
-  
+
   console.log(`📊 Received: ${temperature}°C, ${humidity}%`);
-  
+
   db.run(
     'INSERT INTO weather_data (temperature, humidity) VALUES (?, ?)',
     [temperature, humidity],
-    function(err) {
+    function (err) {
       if (err) {
         console.error(err);
         res.status(500).json({ error: err.message });
@@ -69,7 +69,9 @@ app.get('/api/weather/stats', (req, res) => {
       AVG(temperature) as avg_temp,
       MAX(temperature) as max_temp,
       MIN(temperature) as min_temp,
-      AVG(humidity) as avg_humidity
+      AVG(humidity) as avg_humidity,
+      MAX(humidity) as max_humidity,
+      MIN(humidity) as min_humidity
      FROM weather_data`,
     (err, row) => {
       if (err) {
@@ -81,7 +83,27 @@ app.get('/api/weather/stats', (req, res) => {
   );
 });
 
-const PORT = process.env.PORT || 3000;
+// Get recent history for charting (default last 50 readings, newest last)
+app.get('/api/weather/history', (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit) || 50, 500);
+
+  db.all(
+    `SELECT temperature, humidity, created_at
+     FROM weather_data
+     ORDER BY created_at DESC
+     LIMIT ?`,
+    [limit],
+    (err, rows) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+      } else {
+        res.json(rows.reverse()); // oldest -> newest for chart plotting
+      }
+    }
+  );
+});
+
+const PORT = 3000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log('\n🌤️  WEATHER STATION');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
