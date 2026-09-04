@@ -212,6 +212,8 @@
   </div>
 
   <script>
+    let lastSeenTime = null;
+
     async function fetchLatest() {
       try {
         const res = await fetch('/api/weather/latest');
@@ -226,21 +228,26 @@
           document.getElementById('status').textContent = `✅ Connected • Last: ${timeStr}`;
           document.getElementById('status').className = 'status online';
           
-          const list = document.getElementById('updatesList');
-          if (list.children[0].textContent.includes('Waiting')) {
-            list.innerHTML = '';
-          }
-          
-          const item = document.createElement('div');
-          item.className = 'update-item';
-          item.innerHTML = `
-            <div class="update-time">${timeStr}</div>
-            <div class="update-value">🌡️ ${data.temperature.toFixed(1)}°C | 💧 ${Math.round(data.humidity)}%</div>
-          `;
-          list.insertBefore(item, list.firstChild);
-          
-          while (list.children.length > 20) {
-            list.removeChild(list.lastChild);
+          // Only add a new update card if this is actually a new reading
+          if (data.created_at !== lastSeenTime) {
+            lastSeenTime = data.created_at;
+
+            const list = document.getElementById('updatesList');
+            if (list.children[0].textContent.includes('Waiting')) {
+              list.innerHTML = '';
+            }
+            
+            const item = document.createElement('div');
+            item.className = 'update-item';
+            item.innerHTML = `
+              <div class="update-time">${timeStr}</div>
+              <div class="update-value">🌡️ ${data.temperature.toFixed(1)}°C | 💧 ${Math.round(data.humidity)}%</div>
+            `;
+            list.insertBefore(item, list.firstChild);
+            
+            while (list.children.length > 20) {
+              list.removeChild(list.lastChild);
+            }
           }
         }
       } catch (err) {
@@ -270,7 +277,7 @@
     setInterval(() => {
       fetchLatest();
       fetchStats();
-    }, 5000);
+    }, 2000); // poll every 2s to match ESP32 send rate
   </script>
 </body>
 </html>
