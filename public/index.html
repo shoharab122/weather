@@ -488,8 +488,8 @@
       const data = await res.json();
       if (data.temperature === undefined) return;
 
-      document.getElementById('tempMain').textContent = Math.round(data.temperature);
-      document.getElementById('humidPct').textContent = `${Math.round(data.humidity)}%`;
+      document.getElementById('tempMain').textContent = data.temperature.toFixed(1);
+      document.getElementById('humidPct').textContent = `${data.humidity.toFixed(1)}%`;
       document.getElementById('conditionText').textContent = conditionFor(data.temperature, data.humidity);
       document.getElementById('deviceStatus').textContent = '🟢 Connected • ' + new Date(data.created_at).toLocaleTimeString();
 
@@ -511,13 +511,13 @@
       const res = await fetch('/api/weather/stats');
       const data = await res.json();
       if (!data.count) return;
-      document.getElementById('hiTemp').textContent = Math.round(data.max_temp) + '°';
-      document.getElementById('loTemp').textContent = Math.round(data.min_temp) + '°';
-      document.getElementById('peakTemp').textContent = Math.round(data.max_temp) + '°';
-      document.getElementById('peakHumid').textContent = Math.round(data.max_humidity) + '%';
+      document.getElementById('hiTemp').textContent = data.max_temp.toFixed(1) + '°';
+      document.getElementById('loTemp').textContent = data.min_temp.toFixed(1) + '°';
+      document.getElementById('peakTemp').textContent = data.max_temp.toFixed(1) + '°';
+      document.getElementById('peakHumid').textContent = data.max_humidity.toFixed(1) + '%';
 
-      document.getElementById('avgTempVal').textContent = Math.round(data.avg_temp) + '°';
-      document.getElementById('avgHumidVal').textContent = Math.round(data.avg_humidity) + '%';
+      document.getElementById('avgTempVal').textContent = data.avg_temp.toFixed(1) + '°';
+      document.getElementById('avgHumidVal').textContent = data.avg_humidity.toFixed(1) + '%';
       document.getElementById('countVal').textContent = data.count;
 
       const tempPct = Math.min(100, Math.max(0, ((data.avg_temp - data.min_temp) / ((data.max_temp - data.min_temp) || 1)) * 100));
@@ -589,7 +589,7 @@
 
     tempsEl.innerHTML = sampleIdxs.map((idx, i) => {
       const isMid = i === Math.floor(sampleCount / 2);
-      return `<span class="${isMid ? 'active' : ''}">${Math.round(rows[idx].temperature)}°</span>`;
+      return `<span class="${isMid ? 'active' : ''}">${rows[idx].temperature.toFixed(1)}°</span>`;
     }).join('');
   }
 
@@ -637,8 +637,8 @@
       const data = JSON.parse(e.data);
 
       // Update everything that depends on the latest single reading, instantly
-      document.getElementById('tempMain').textContent = Math.round(data.temperature);
-      document.getElementById('humidPct').textContent = `${Math.round(data.humidity)}%`;
+      document.getElementById('tempMain').textContent = data.temperature.toFixed(1);
+      document.getElementById('humidPct').textContent = `${data.humidity.toFixed(1)}%`;
       document.getElementById('conditionText').textContent = conditionFor(data.temperature, data.humidity);
       document.getElementById('deviceStatus').textContent = '🟢 Connected • ' + new Date(data.created_at).toLocaleTimeString();
 
