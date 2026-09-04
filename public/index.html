@@ -607,12 +607,66 @@
     fetchLatest(); fetchStats(); fetchHistory();
   });
 
+  // Initial load
   fetchLatest();
   fetchStats();
   fetchHistory();
 
-  setInterval(() => { fetchLatest(); fetchStats(); }, 2000);
-  setInterval(fetchHistory, 8000);
+  // ---- Real-time updates via Server-Sent Events ----
+  // The server pushes a 'reading' event the instant the ESP32 posts new data,
+  // so the dashboard updates immediately instead of waiting for a poll interval.
+  let historyDebounce = null;
+  let fallbackPoll = null;
+
+  function startFallbackPolling() {
+    if (fallbackPoll) return;
+    fallbackPoll = setInterval(() => { fetchLatest(); fetchStats(); fetchHistory(); }, 3000);
+  }
+  function stopFallbackPolling() {
+    if (fallbackPoll) { clearInterval(fallbackPoll); fallbackPoll = null; }
+  }
+
+  function connectStream() {
+    const source = new EventSource('/api/weather/stream');
+
+    source.addEventListener('open', () => {
+      stopFallbackPolling(); // SSE is live, no need to poll
+    });
+
+    source.addEventListener('reading', (e) => {
+      const data = JSON.parse(e.data);
+
+      // Update everything that depends on the latest single reading, instantly
+      document.getElementById('tempMain').textContent = Math.round(data.temperature);
+      document.getElementById('humidPct').textContent = `${Math.round(data.humidity)}%`;
+      document.getElementById('conditionText').textContent = conditionFor(data.temperature, data.humidity);
+      document.getElementById('deviceStatus').textContent = '🟢 Connected • ' + new Date(data.created_at).toLocaleTimeString();
+
+      const pill = document.getElementById('statusPill');
+      if (data.humidity > 80 || data.temperature > 35) {
+        pill.textContent = 'Dangerous';
+        pill.className = 'status-pill warn';
+      } else {
+        pill.textContent = 'Normal';
+        pill.className = 'status-pill ok';
+      }
+
+      // Stats (avg/min/max) and the charts need the full dataset, so refresh
+      // those right after — debounced in case several readings land close together
+      clearTimeout(historyDebounce);
+      historyDebounce = setTimeout(() => { fetchStats(); fetchHistory(); }, 150);
+    });
+
+    source.onerror = () => {
+      // Connection dropped (e.g. Render free-tier idle sleep, network blip).
+      // Fall back to polling so the dashboard keeps working, and let the
+      // browser's built-in EventSource auto-reconnect logic keep retrying.
+      document.getElementById('deviceStatus').textContent = '🟡 Reconnecting…';
+      startFallbackPolling();
+    };
+  }
+
+  connectStream();
 </script>
 </body>
 </html>
