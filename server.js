@@ -25,6 +25,38 @@ const db = new sqlite3.Database('./weather.db', (err) => {
   }
 });
 
+// ---- Real-time push (Server-Sent Events) ----
+// Every browser tab that opens the dashboard registers a connection here.
+// Whenever a new ESP32 reading comes in, we push it to all open tabs instantly,
+// instead of making the browser wait for its next poll.
+let sseClients = [];
+
+app.get('/api/weather/stream', (req, res) => {
+  res.set({
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive'
+  });
+  res.flushHeaders();
+  res.write(': connected\n\n');
+
+  sseClients.push(res);
+
+  req.on('close', () => {
+    sseClients = sseClients.filter((client) => client !== res);
+  });
+});
+
+function broadcast(event, data) {
+  const payload = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+  sseClients.forEach((client) => client.write(payload));
+}
+
+// Send a heartbeat every 20s so proxies/browsers don't silently drop idle SSE connections
+setInterval(() => {
+  sseClients.forEach((client) => client.write(': ping\n\n'));
+}, 20000);
+
 // Receive data from ESP32
 app.post('/api/weather', (req, res) => {
   const { temperature, humidity } = req.body;
@@ -40,6 +72,13 @@ app.post('/api/weather', (req, res) => {
         res.status(500).json({ error: err.message });
       } else {
         res.json({ success: true });
+        // Push the fresh reading to every connected dashboard immediately
+        broadcast('reading', {
+          id: this.lastID,
+          temperature,
+          humidity,
+          created_at: new Date().toISOString()
+        });
       }
     }
   );
@@ -109,5 +148,6 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log(`📱 Website: http://localhost:${PORT}`);
   console.log(`📍 Local Network: http://192.168.x.x:${PORT}`);
-  console.log(`📡 Database: ./weather.db (SQLite)\n`);
+  console.log(`📡 Database: ./weather.db (SQLite)`);
+  console.log(`⚡ Real-time stream: /api/weather/stream\n`);
 });
